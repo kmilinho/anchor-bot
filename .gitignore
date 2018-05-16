@@ -15,3 +15,5 @@
 
 # goland
 .idea/
+
+config.json

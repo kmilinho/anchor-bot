@@ -3,9 +3,10 @@ package main
 import (
 	"github.com/spf13/viper"
 	"log"
+	"github.com/kmilinho/twcli/cmd/twcli/core"
 )
 
-type Config struct {
+type TwitterCred struct {
 	ConsumerKey    string
 	ConsumerSecret string
 	OauthToken     string
@@ -13,21 +14,18 @@ type Config struct {
 }
 
 func main() {
-	var config Config
+	var credentials TwitterCred
 
-	viper.SetConfigName("config")
+	viper.SetConfigName("credentials")
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+		log.Fatalf("Error reading credentials file, %s", err)
 	}
-	err := viper.Unmarshal(&config)
+	err := viper.Unmarshal(&credentials)
 	if err != nil {
 		log.Fatalf("unable to decode into struct, %v", err)
 	}
 
-	log.Printf("Your twitter consumer key is %s", config.ConsumerKey)
-	log.Printf("Your twitter consumer secret is %s", config.ConsumerSecret)
-	log.Printf("Your twitter oauth token is %s", config.OauthToken)
-	log.Printf("Your twitter oauth secret is %s", config.OauthSecret)
+	core.Run()
 }

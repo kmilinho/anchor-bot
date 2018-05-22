@@ -5,8 +5,10 @@ import (
 	"sync"
 	"time"
 	"io/ioutil"
+	"fmt"
 )
 
+//TODO: How to avoid package scoped vars
 var httpCliInstance *HTTPCli
 var once sync.Once
 
@@ -25,7 +27,7 @@ func Get(url string, headers map[string]string, queryParams map[string]string) (
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("creating the request: %v", err)
 	}
 
 	for k, v := range headers {
@@ -36,13 +38,14 @@ func Get(url string, headers map[string]string, queryParams map[string]string) (
 
 	resp, err := httCli.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("sending the request: %v", err)
 	}
 	defer resp.Body.Close()
 
+	//TODO: Handle HTTP response codes
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading the response: %v", err)
 	}
 
 	return body, nil
@@ -65,3 +68,4 @@ func getHTTPCli() *HTTPCli {
 	})
 	return httpCliInstance
 }
+

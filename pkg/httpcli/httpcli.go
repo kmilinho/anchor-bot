@@ -9,16 +9,11 @@ import (
 )
 
 //TODO: How to avoid package scoped vars
-var httpCliInstance *HTTPCli
+var httpCliInstance *http.Client
 var once sync.Once
 
 //TODO: Make it configurable
 const requestTimeout = 30
-
-// HTTPCli - HTTP Client
-type HTTPCli struct {
-	*http.Client
-}
 
 // Get - Perform HTTP Get Request.
 func Get(url string, headers map[string]string, queryParams map[string]string) ([]byte, error) {
@@ -59,12 +54,12 @@ func addQueryParams(req *http.Request, queryParams map[string]string) {
 	req.URL.RawQuery = query.Encode()
 }
 
-func getHTTPCli() *HTTPCli {
+func getHTTPCli() *http.Client {
+	var httpCliInstance *http.Client
 	once.Do(func() {
-		httpClient := &http.Client{
+		httpCliInstance = &http.Client{
 			Timeout: time.Second * time.Duration(requestTimeout),
 		}
-		httpCliInstance = &HTTPCli{httpClient}
 	})
 	return httpCliInstance
 }

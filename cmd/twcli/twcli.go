@@ -26,25 +26,20 @@ func main() {
 	//	log.Fatalf("unable to decode into struct, %v", err)
 	//}
 
-	exitApp := make(chan bool)
+	keys := keys.NewTermBoxKeyListener()
 
-	keyEventManager := keys.New()
-
-	keyEventManager.Register("q", func(key string) {
-		keyEventManager.Stop()
-		exitApp<-true
+	keys.Register("q", func(key string) {
+		keys.Stop()
 	})
 
-	keyEventManager.Register("w", func(key string) {
+	keys.Register("w", func(key string) {
 		fmt.Println("some tweets")
 	})
 
-
-	keyEventManager.Register("s", func(key string) {
+	keys.Register("s", func(key string) {
 		fmt.Println("some other tweets")
 	})
 
-	keyEventManager.Start()
-
-	<-exitApp
+	keys.Start()
+	keys.Wait()
 }

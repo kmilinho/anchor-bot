@@ -1,21 +1,22 @@
-package httpcli
+package tests
 
 import (
 	"testing"
 	"net/http/httptest"
 	"net/http"
+	"github.com/kmilinho/twcli/pkg/httpcli"
 )
 
 func TestGet(t *testing.T) {
 
-	headerKey := "x-test-header"
+	headerKey := "x-tests-header"
 	headerVal := "abc"
 	headers := map[string]string{
 		headerKey: headerVal,
 	}
 
-	queryKey := "test-param"
-	queryVal := "test-value"
+	queryKey := "tests-param"
+	queryVal := "tests-value"
 	queryParams := map[string]string{
 		queryKey: queryVal,
 	}
@@ -34,5 +35,5 @@ func TestGet(t *testing.T) {
 
 	testServer := httptest.NewServer(http.HandlerFunc(checkRequest))
 
-	Get(testServer.URL, headers, queryParams)
+	httpcli.Get(testServer.URL, headers, queryParams)
 }

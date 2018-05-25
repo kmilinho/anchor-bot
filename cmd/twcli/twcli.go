@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/kmilinho/twcli/cmd/twcli/cli"
+	"github.com/kmilinho/twcli/pkg/keys"
+	"fmt"
 )
 
 //type TwitterCred struct {
@@ -25,5 +26,25 @@ func main() {
 	//	log.Fatalf("unable to decode into struct, %v", err)
 	//}
 
-	cli.Run()
+	exitApp := make(chan bool)
+
+	keyEventManager := keys.New()
+
+	keyEventManager.Register("q", func(key string) {
+		keyEventManager.Stop()
+		exitApp<-true
+	})
+
+	keyEventManager.Register("w", func(key string) {
+		fmt.Println("some tweets")
+	})
+
+
+	keyEventManager.Register("s", func(key string) {
+		fmt.Println("some other tweets")
+	})
+
+	keyEventManager.Start()
+
+	<-exitApp
 }

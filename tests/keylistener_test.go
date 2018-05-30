@@ -2,19 +2,30 @@ package tests
 
 import (
 	"testing"
+	"container/list"
 	"github.com/kmilinho/twcli/pkg/keys"
+	"time"
+	"fmt"
 )
 
-func TestRegisterFailsIfListenerIsRunning(t *testing.T) {
-	listener := keys.NewKeyListener(&TestTermController{t})
+func TestListenerWithTermController(t *testing.T) {
+	mockTermController := &TestTermController{t, list.New()}
+	listener := keys.NewKeyListener(mockTermController)
+	listener.Register("x", func(s string) {})
 	listener.Start()
-	k, err := listener.Register("x", func(s string) {
+	go func() {
+		time.Sleep(time.Second)
+		listener.Stop()
+		t.Log("listener stopped")
+	}()
+	listener.Wait()
 
-	})
-
-	if k != nil || err == nil {
-		t.Errorf("Register() must fail if listener is running")
+	for e := mockTermController.interaction.Front(); e != nil; e = e.Next() {
+		fmt.Println(e.Value)
 	}
+}
+
+func TestRegisterFailsIfListenerIsRunning(t *testing.T) {
 }
 
 func TestRegisterDoesNotFailIfListenerIsStopped(t *testing.T) {
@@ -33,26 +44,34 @@ func TestRegisterDoesNotFailIfListenerIsStopped(t *testing.T) {
 
 type TestTermController struct {
 	t *testing.T
+	interaction *list.List
 }
 
-func (*TestTermController) GetErrorEventType() uint8 {
+func (tc *TestTermController) GetErrorEventType() uint8 {
+	tc.interaction.PushBack("GetErrorEventType")
+	return 1
+}
+
+func (tc *TestTermController) GetKeyEventType() uint8 {
+	tc.interaction.PushBack("GetKeyEventType")
 	return 0
 }
 
-func (*TestTermController) GetKeyEventType() uint8 {
-	return 0
-}
-
-func (*TestTermController) Init() error{
+func (tc *TestTermController) Init() error{
+	tc.interaction.PushBack("Init")
 	return nil
 }
 
-func (*TestTermController) Close() {
+func (tc *TestTermController) Close() {
+	tc.interaction.PushBack("Close")
 }
 
-func (*TestTermController) PollEvent() keys.KeyEvent {
+func (tc *TestTermController) PollEvent() keys.KeyEvent {
+	tc.interaction.PushBack("PollEvent")
+	time.Sleep(200 * time.Millisecond)
 	return keys.KeyEvent{}
 }
 
-func (*TestTermController) Sync() {
+func (tc *TestTermController) Sync() {
+	tc.interaction.PushBack("Sync")
 }

@@ -3,7 +3,6 @@ package keys
 import (
 	"os"
 	"log"
-	"errors"
 )
 
 type KeyEvent struct {
@@ -26,7 +25,6 @@ type KeyListener struct {
 	bindings       map[string]func(string)
 	exit           chan bool
 	wait           chan bool
-	running        bool
 }
 
 func NewKeyListener(controller TermController) *KeyListener {
@@ -43,7 +41,6 @@ func NewKeyListener(controller TermController) *KeyListener {
 		bindings,
 		exit,
 		wait,
-		false,
 	}
 }
 
@@ -55,22 +52,17 @@ func NewTermBoxKeyListener() *KeyListener {
 // register event handlers associated to key pressed events
 // for example: execute the exit function when the key 'q' is pressed
 func (listener *KeyListener) Register(key string, handler func(string)) (*KeyListener, error) {
-	if listener.running {
-		return nil, errors.New("cannot register the key handler, key listener already running")
-	}
 	listener.bindings[key] = handler
 	return listener, nil
 }
 
 // stop the key listener, it interrupt the internal event loop
 func (listener *KeyListener) Stop() {
-	listener.running = false
 	listener.exit <- true
 }
 
 // start the key listener, it runs the internal event loop to start listening for key events
 func (listener *KeyListener) Start() {
-	listener.running = true
 	go keyEventLoop(listener)
 }
 

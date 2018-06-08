@@ -6,6 +6,8 @@ import (
 	"time"
 	"io/ioutil"
 	"fmt"
+	"encoding/json"
+	"bytes"
 )
 
 //TODO: How to avoid package scoped vars
@@ -17,10 +19,20 @@ const requestTimeout = 30
 
 // Get - Perform HTTP Get Request.
 func Get(url string, headers map[string]string, queryParams map[string]string) ([]byte, error) {
+	return httReq(url, "GET", headers, queryParams, nil)
+}
 
-	httCli := getHTTPCli()
+func Post(url string, headers map[string]string, queryParams map[string]string, reqBody interface{}) ([]byte, error) {
+	bodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("marshalling the request: %v", err)
+	}
+	return httReq(url, "POST", headers, queryParams, bodyBytes)
+}
 
-	req, err := http.NewRequest("GET", url, nil)
+func httReq(url string, method string, headers map[string]string, queryParams map[string]string, reqBody []byte) ([]byte, error) {
+
+	req, err := http.NewRequest(method, url, bytes.NewReader(reqBody))
 	if err != nil {
 		return nil, fmt.Errorf("creating the request: %v", err)
 	}
@@ -28,9 +40,9 @@ func Get(url string, headers map[string]string, queryParams map[string]string) (
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
-
 	addQueryParams(req, queryParams)
 
+	httCli := getHTTPCli()
 	resp, err := httCli.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("sending the request: %v", err)

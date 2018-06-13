@@ -2,7 +2,6 @@ package httpcli
 
 import (
 	"net/http"
-	"sync"
 	"time"
 	"io/ioutil"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 
 //TODO: How to avoid package scoped vars
 var httpCliInstance *http.Client
-var once sync.Once
 
 //TODO: Make it configurable
 const requestTimeout = 30
@@ -67,12 +65,10 @@ func addQueryParams(req *http.Request, queryParams map[string]string) {
 }
 
 func getHTTPCli() *http.Client {
-	var httpCliInstance *http.Client
-	once.Do(func() {
+	if httpCliInstance == nil {
 		httpCliInstance = &http.Client{
 			Timeout: time.Second * time.Duration(requestTimeout),
 		}
-	})
+	}
 	return httpCliInstance
 }
-

@@ -9,6 +9,11 @@ import (
 	"io/ioutil"
 )
 
+type SomeTestStruct struct {
+	PropA string `json:"prop_a"`
+	PropB int `json:"prop_b"`
+}
+
 func TestGet(t *testing.T) {
 
 	headerKey := "x-tests-header"
@@ -39,11 +44,6 @@ func TestGet(t *testing.T) {
 
 	httpcli.Get(testServer.URL, headers, queryParams)
 	defer testServer.Close()
-}
-
-type SomeTestStruct struct {
-	PropA string `json:"prop_a"`
-	PropB int `json:"prop_b"`
 }
 
 func TestPost(t *testing.T) {
